@@ -53,7 +53,22 @@ publishing {
                 licenses {
                     license {
                         name = 'BSD 3-Clause'
-                        url = 'https://github.com/spacemaven/plugins/'
+                        url = 'https://github.com/spacemaven-packages/plugins/blob/master/LICENCE'
+                    }
+                }
+
+                scm {
+                    url = 'https://github.com/spacemaven-packages/plugins/'
+                    connection = 'git:https://github.com/spacemaven-packages/plugins.git'
+                    developerConnection = 'git:ssh:git@github.com:spacemaven-packages/plugins.git'
+                }
+
+                developers {
+                    developer {
+                        name = 'der_frühling'
+                        url = 'https://derfrühling.net'
+                        email = 'daedula@derfruhling.net'
+                        timezone = 'Pacific'
                     }
                 }
             }
