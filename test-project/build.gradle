@@ -1,0 +1,26 @@
+plugins {
+    id 'net.derfruhling.spacemaven.tools'
+}
+
+repositories {
+    maven {
+        name 'spacemaven-tools'
+        url 'https://spacemaven.derfruhling.net/tools/'
+
+        mavenContent {
+            onlyForConfigurations("tool")
+        }
+    }
+}
+
+dependencies {
+    tool 'net.derfruhling.spacemaven.tools:test-tool:1.0'
+}
+
+tasks.register("toolsInfo") {
+    dependsOn(configurations.tool)
+
+    doFirst {
+        println configurations.tool.resolve()
+    }
+}

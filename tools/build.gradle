@@ -1,0 +1,8 @@
+gradlePlugin {
+    plugins {
+        create("tools") {
+            id = 'net.derfruhling.spacemaven.tools'
+            implementationClass = 'net.derfruhling.spacemaven.tools.ToolsPlugin'
+        }
+    }
+}

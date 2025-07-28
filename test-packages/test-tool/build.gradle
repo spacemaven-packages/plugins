@@ -1,0 +1,72 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'maven-publish'
+}
+
+group = 'net.derfruhling.spacemaven.tools'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+configurations {
+    toolArtifact
+}
+
+application {
+    mainClass = 'net.derfruhling.spacemaven.tools.Main'
+}
+
+def zipArtifact = artifacts.add("toolArtifact", tasks.named("distZip"))
+def tarArtifact = artifacts.add("toolArtifact", tasks.named("distTar"))
+
+publishing {
+    repositories {
+        maven {
+            name 'spacemavenTools'
+            url 'https://spacemaven.derfruhling.net/tools/'
+
+            credentials {
+                username project.property('spacemaven.user') as String ?: 'no user'
+                password project.property('spacemaven.key') as String ?: 'no password'
+            }
+        }
+    }
+
+    publications {
+        register("maven", MavenPublication) {
+            pom {
+                name = 'Spacemaven Test Tool'
+                description = 'This is a test tool that should print "Hello, world!" when executed'
+
+                licenses {
+                    license {
+                        name = 'BSD 3-Clause'
+                        url = 'https://github.com/spacemaven/plugins/'
+                    }
+                }
+            }
+
+            artifact(zipArtifact) {
+                extension = 'zip'
+                classifier = 'spm+tool'
+            }
+
+            artifact(tarArtifact) {
+                extension = 'tar'
+                classifier = 'spm+tool'
+            }
+        }
+    }
+}
