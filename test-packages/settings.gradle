@@ -1,1 +1,9 @@
+pluginManagement {
+    includeBuild '..'
+}
+
+plugins {
+    id 'net.derfruhling.spacemaven.build-cache'
+}
+
 include 'test-tool'

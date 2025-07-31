@@ -34,6 +34,17 @@ def tarArtifact = artifacts.add("toolArtifact", tasks.named("distTar"))
 publishing {
     repositories {
         maven {
+            name 'testMaven'
+            url 'http://127.0.0.1:8080/tools/'
+
+            allowInsecureProtocol true
+
+            credentials {
+                username project.property('spacemaven.user') as String ?: 'no user'
+                password project.property('spacemaven.key') as String ?: 'no password'
+            }
+        }
+        maven {
             name 'spacemavenTools'
             url 'https://spacemaven.derfruhling.net/tools/'
 

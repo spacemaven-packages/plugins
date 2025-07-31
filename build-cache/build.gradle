@@ -1,0 +1,27 @@
+group = 'net.derfruhling.spacemaven'
+version = '0.1.0'
+
+gradlePlugin {
+    plugins {
+        create("build-cache") {
+            id = 'net.derfruhling.spacemaven.build-cache'
+            implementationClass = 'net.derfruhling.spacemaven.buildcache.BuildCachePlugin'
+            displayName = 'Spacemaven Build Cache Plugin'
+            description = 'Configures the Gradle build cache for use with Spacemaven automatically'
+        }
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            name 'spacemavenGradlePlugins'
+            url 'https://spacemaven.derfruhling.net/gradle-plugins/'
+
+            credentials {
+                username project.property('spacemaven.user') as String ?: 'anonymous'
+                password project.property('spacemaven.key') as String ?: 'anonymous'
+            }
+        }
+    }
+}

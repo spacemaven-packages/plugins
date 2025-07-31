@@ -12,3 +12,4 @@ dependencyResolutionManagement {
 }
 
 include 'tools'
+include 'build-cache'
