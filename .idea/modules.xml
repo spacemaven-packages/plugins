@@ -3,7 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/build-cache/spacemaven-plugins.build-cache.main.iml" filepath="$PROJECT_DIR$/.idea/modules/build-cache/spacemaven-plugins.build-cache.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cmake/spacemaven-plugins.cmake.main.iml" filepath="$PROJECT_DIR$/.idea/modules/cmake/spacemaven-plugins.cmake.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/tools/spacemaven-plugins.tools.main.iml" filepath="$PROJECT_DIR$/.idea/modules/tools/spacemaven-plugins.tools.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/test-packages.iml" filepath="$PROJECT_DIR$/.idea/modules/test-packages.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/test-cmake/test-packages.test-cmake.iml" filepath="$PROJECT_DIR$/.idea/modules/test-cmake/test-packages.test-cmake.iml" />
     </modules>
   </component>
 </project>

@@ -1,0 +1,19 @@
+plugins {
+    id 'groovy'
+}
+
+version = '0.1.0-SNAPSHOT'
+
+gradlePlugin {
+    plugins {
+        create("cmakeWrapper") {
+            id = 'net.derfruhling.cmake-wrapper'
+            implementationClass = 'net.derfruhling.cmake.CMakeWrapperPlugin'
+        }
+    }
+}
+
+dependencies {
+    implementation gradleApi()
+//    implementation 'com.google.guava:guava:33.4.8-jre'
+}

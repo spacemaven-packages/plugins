@@ -1,0 +1,76 @@
+import net.derfruhling.cmake.OutputKind
+
+plugins {
+    id 'net.derfruhling.cmake-wrapper'
+    id 'maven-publish'
+}
+
+group = 'net.derfruhling.spacemaven.test'
+version = '0.1.0'
+
+cmake {
+    buildFile = file('CMakeLists.txt')
+    publicHeadersArchive = tasks.register('makePublicHeadersArchive', Zip) {
+        from(projectDir) {
+            include 'test.h'
+        }
+
+        into '/'
+    }
+
+    targets {
+        linuxX64()
+        macosX64()
+        macosArm64()
+        windowsX64()
+    }
+
+    variants {
+        variant('debug', isDebuggable: true, isOptimized: false) {
+            define CMAKE_BUILD_TYPE: 'Debug'
+        }
+
+        variant('release', isDebuggable: false, isOptimized: true) {
+            define CMAKE_BUILD_TYPE: 'Release'
+        }
+    }
+
+    configurations {
+        staticLibrary {
+            outputKind OutputKind.STATIC_LIBRARY
+            define LIBRARY_KIND: 'STATIC'
+
+            targets {
+                register('theTest') {
+                    target 'the-test'
+                }
+            }
+        }
+
+        sharedLibrary {
+            outputKind OutputKind.SHARED_LIBRARY
+            define LIBRARY_KIND: 'SHARED'
+
+            targets {
+                register('theTest') {
+                    target 'the-test'
+                }
+            }
+        }
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            name 'test'
+            url project.layout.buildDirectory.dir('test-repo')
+        }
+    }
+
+    publications {
+        register('maven', MavenPublication) {
+            from components.cmake
+        }
+    }
+}

@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'net.derfruhling.spacemaven.tools'
-version = '1.0'
+version = '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -29,7 +29,6 @@ application {
 }
 
 def zipArtifact = artifacts.add("toolArtifact", tasks.named("distZip"))
-def tarArtifact = artifacts.add("toolArtifact", tasks.named("distTar"))
 
 publishing {
     repositories {
@@ -44,6 +43,7 @@ publishing {
                 password project.property('spacemaven.key') as String ?: 'no password'
             }
         }
+
         maven {
             name 'spacemavenTools'
             url 'https://spacemaven.derfruhling.net/tools/'
@@ -79,18 +79,13 @@ publishing {
                         name = 'der_frühling'
                         url = 'https://derfrühling.net'
                         email = 'daedula@derfruhling.net'
-                        timezone = 'Pacific'
+                        timezone = 'America/Los_Angeles'
                     }
                 }
             }
 
             artifact(zipArtifact) {
                 extension = 'zip'
-                classifier = 'spm+tool'
-            }
-
-            artifact(tarArtifact) {
-                extension = 'tar'
                 classifier = 'spm+tool'
             }
         }

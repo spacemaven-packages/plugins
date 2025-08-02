@@ -1,3 +1,31 @@
+plugins {
+    id 'dev.clojurephant.clojure'
+}
+
+group = 'net.derfruhling.spacemaven'
+version = '0.1.0'
+
+repositories {
+    mavenCentral()
+
+    maven {
+        name 'clojars'
+        url 'https://repo.clojars.org/'
+    }
+}
+
+clojure.builds.named("main") {
+    aotAll()
+}
+
+dependencies {
+    implementation("org.clojure:clojure:1.12.1")
+}
+
+validatePlugins {
+    dependsOn 'compileClojure'
+}
+
 gradlePlugin {
     plugins {
         create("tools") {

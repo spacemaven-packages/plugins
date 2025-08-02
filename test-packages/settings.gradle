@@ -7,3 +7,4 @@ plugins {
 }
 
 include 'test-tool'
+include 'test-cmake'
