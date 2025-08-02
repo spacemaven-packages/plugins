@@ -54,6 +54,14 @@ class CMakeWrapperPlugin implements Plugin<Project> {
         def runtimeOnlyConfiguration = project.configurations.maybeCreate("runtimeOnly")
         def compileOnlyConfiguration = project.configurations.maybeCreate("compileOnly")
 
+        runtimeOnlyConfiguration.extendsFrom(implementationConfiguration, apiConfiguration)
+        compileOnlyConfiguration.extendsFrom(implementationConfiguration, apiConfiguration)
+
+        apiConfiguration.transitive = true
+        implementationConfiguration.transitive = false
+        runtimeOnlyConfiguration.transitive = false
+        compileOnlyConfiguration.transitive = false
+
         project.components.registerBinding(AggregateSoftwareComponent, AggregateSoftwareComponent)
         def rootComponent = objects.newInstance(AggregateSoftwareComponent, 'cmake')
         project.components.add(rootComponent)
@@ -90,6 +98,14 @@ class CMakeWrapperPlugin implements Plugin<Project> {
 
                 component.addVariantsFromConfiguration(apiConfig) {
                     it.mapToMavenScope("compile")
+                }
+
+                component.addVariantsFromConfiguration(compileOnlyConfiguration) {
+                    it.mapToMavenScope('compile')
+                }
+
+                component.addVariantsFromConfiguration(runtimeOnlyConfiguration) {
+                    it.mapToMavenScope('runtime')
                 }
 
                 rootComponent.registerVariant(component)
@@ -170,17 +186,31 @@ class CMakeWrapperPlugin implements Plugin<Project> {
                                     configureTask,
                                     config,
                                     variant,
-                                    implementationConfiguration,
-                                    apiConfiguration,
-                                    compileOnlyConfiguration,
-                                    runtimeOnlyConfiguration,
                                     outConfig,
                                     isDebuggable,
                                     isOptimized
                             )
 
+                            def cmakeTargetBaseName = "cmake${config.name.capitalize()}${variant.capitalize()}${target.name.capitalize()}${cmakeTarget.variantName.capitalize()}"
+                            def commonConfig = project.configurations.maybeCreate(cmakeTargetBaseName)
+                            commonConfig.extendsFrom(implementationConfiguration, apiConfiguration)
+
+                            def linkConfig = project.configurations.maybeCreate(cmakeTargetBaseName + 'Link')
+                            linkConfig.extendsFrom(commonConfig, compileOnlyConfiguration)
+
+                            def runtimeConfig = project.configurations.maybeCreate(cmakeTargetBaseName + 'Runtime')
+                            runtimeConfig.extendsFrom(commonConfig, runtimeOnlyConfiguration)
+
                             component.addVariantsFromConfiguration(outConfig) {
                                 it.mapToOptional()
+                            }
+
+                            component.addVariantsFromConfiguration(linkConfig) {
+                                it.mapToMavenScope('compile')
+                            }
+
+                            component.addVariantsFromConfiguration(runtimeConfig) {
+                                it.mapToMavenScope('runtime')
                             }
 
                             rootComponent.registerVariant(component)
@@ -222,10 +252,6 @@ class CMakeWrapperPlugin implements Plugin<Project> {
             Provider<Task> configureTask,
             CMakeConfiguration config,
             String variant,
-            Configuration implementationConfiguration,
-            Configuration apiConfiguration,
-            Configuration compileOnlyConfiguration,
-            Configuration runtimeOnlyConfiguration,
             Configuration outConfig,
             boolean isDebuggable,
             boolean isOptimized
@@ -300,15 +326,6 @@ class CMakeWrapperPlugin implements Plugin<Project> {
             // these then should be usable as regular dependency configurations
         }
         */
-
-        def commonConfig = project.configurations.maybeCreate(cmakeTargetBaseName)
-        commonConfig.extendsFrom(implementationConfiguration, apiConfiguration)
-
-        def linkConfig = project.configurations.maybeCreate(cmakeTargetBaseName + 'Link')
-        linkConfig.extendsFrom(commonConfig, compileOnlyConfiguration)
-
-        def runtimeConfig = project.configurations.maybeCreate(cmakeTargetBaseName + 'Runtime')
-        runtimeConfig.extendsFrom(commonConfig, runtimeOnlyConfiguration)
 
         outConfig.outgoing {
             def theVariant = it.variants.maybeCreate("${project.name}_${variant}_${cmakeTarget.platform}_${cmakeTarget.architecture.replace('-', '_')}_${target.outputKind.get().name().toLowerCase().takeBefore("_")}")
