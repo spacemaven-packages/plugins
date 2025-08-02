@@ -49,26 +49,30 @@ class CMakeWrapperPlugin implements Plugin<Project> {
             value.build(targetMachineFactory)
         }
 
-        def implementationConfiguration = project.configurations.maybeCreate("implementation")
-        def apiConfiguration = project.configurations.maybeCreate("api")
-        def runtimeOnlyConfiguration = project.configurations.maybeCreate("runtimeOnly")
-        def compileOnlyConfiguration = project.configurations.maybeCreate("compileOnly")
-
-        runtimeOnlyConfiguration.extendsFrom(implementationConfiguration, apiConfiguration)
-        compileOnlyConfiguration.extendsFrom(implementationConfiguration, apiConfiguration)
-
-        apiConfiguration.transitive = true
-        implementationConfiguration.transitive = false
-        runtimeOnlyConfiguration.transitive = false
-        compileOnlyConfiguration.transitive = false
-
         project.components.registerBinding(AggregateSoftwareComponent, AggregateSoftwareComponent)
-        def rootComponent = objects.newInstance(AggregateSoftwareComponent, 'cmake')
+        def rootComponent = objects.newInstance(AggregateSoftwareComponent, 'cmake', 'implementation', 'api')
         project.components.add(rootComponent)
+
+        def implementationConfiguration = project.configurations.consumable('implementationElements') {
+            it.extendsFrom project.configurations.implementation
+        }
+
+        def apiConfiguration = project.configurations.consumable('apiElements') {
+            it.extendsFrom project.configurations.api
+        }
 
         def ext = project.extensions.create("cmake", CMakeExtension)
         ext.targets.all()
         ext.variants.defaultVariants()
+
+        project.pluginManager.withPlugin('maven-publish') {
+            def publishExt = project.extensions.findByType(PublishingExtension)
+            publishExt.publications {
+                it.create('cmake', MavenPublication) {
+                    it.from rootComponent
+                }
+            }
+        }
 
         project.afterEvaluate {
             rootComponent.publishCoordinates.set(DefaultModuleVersionIdentifier.newId(
@@ -78,9 +82,11 @@ class CMakeWrapperPlugin implements Plugin<Project> {
             ))
 
             if(ext.publicHeadersArchive.isPresent()) {
-                def component = componentFactory.adhoc('cmakeApi')
-                def apiConfig = project.configurations.create('cmakeApi')
+                def component = componentFactory.adhoc('cmakePublicApi')
+                def apiConfig = project.configurations.create('cmakePublicApi')
                 apiConfig.visible = false
+
+                apiConfig.extendsFrom implementationConfiguration.get(), apiConfiguration.get()
 
                 apiConfig.attributes {
                     it.attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling, Bundling.EXTERNAL))
@@ -98,14 +104,6 @@ class CMakeWrapperPlugin implements Plugin<Project> {
 
                 component.addVariantsFromConfiguration(apiConfig) {
                     it.mapToMavenScope("compile")
-                }
-
-                component.addVariantsFromConfiguration(compileOnlyConfiguration) {
-                    it.mapToMavenScope('compile')
-                }
-
-                component.addVariantsFromConfiguration(runtimeOnlyConfiguration) {
-                    it.mapToMavenScope('runtime')
                 }
 
                 rootComponent.registerVariant(component)
@@ -167,6 +165,8 @@ class CMakeWrapperPlugin implements Plugin<Project> {
                             final def outConfig = project.configurations.create("cmakeOut${capName}${variant.capitalize()}${target.name.capitalize()}${cmakeTarget.variantName.capitalize()}")
                             outConfig.visible = false
 
+                            outConfig.extendsFrom implementationConfiguration.get(), apiConfiguration.get()
+
                             outConfig.attributes {
                                 it.attribute(NativeArtifact.CONFIGURATION_ATTRIBUTE, config.name)
                                 it.attribute(NativeArtifact.VARIANT_ATTRIBUTE, variant)
@@ -191,26 +191,8 @@ class CMakeWrapperPlugin implements Plugin<Project> {
                                     isOptimized
                             )
 
-                            def cmakeTargetBaseName = "cmake${config.name.capitalize()}${variant.capitalize()}${target.name.capitalize()}${cmakeTarget.variantName.capitalize()}"
-                            def commonConfig = project.configurations.maybeCreate(cmakeTargetBaseName)
-                            commonConfig.extendsFrom(implementationConfiguration, apiConfiguration)
-
-                            def linkConfig = project.configurations.maybeCreate(cmakeTargetBaseName + 'Link')
-                            linkConfig.extendsFrom(commonConfig, compileOnlyConfiguration)
-
-                            def runtimeConfig = project.configurations.maybeCreate(cmakeTargetBaseName + 'Runtime')
-                            runtimeConfig.extendsFrom(commonConfig, runtimeOnlyConfiguration)
-
                             component.addVariantsFromConfiguration(outConfig) {
                                 it.mapToOptional()
-                            }
-
-                            component.addVariantsFromConfiguration(linkConfig) {
-                                it.mapToMavenScope('compile')
-                            }
-
-                            component.addVariantsFromConfiguration(runtimeConfig) {
-                                it.mapToMavenScope('runtime')
                             }
 
                             rootComponent.registerVariant(component)

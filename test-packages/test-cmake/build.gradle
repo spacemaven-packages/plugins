@@ -8,6 +8,17 @@ plugins {
 group = 'net.derfruhling.spacemaven.test'
 version = '0.1.0'
 
+repositories {
+    maven {
+        name 'spacemavenNative'
+        url 'https://spacemaven.derfruhling.net/native/'
+    }
+}
+
+dependencies {
+    implementation 'net.derfruhling.spaceport:gtest:1.17.0'
+}
+
 cmake {
     buildFile = file('CMakeLists.txt')
     publicHeadersArchive = tasks.register('makePublicHeadersArchive', Zip) {
@@ -65,12 +76,6 @@ publishing {
         maven {
             name 'test'
             url project.layout.buildDirectory.dir('test-repo')
-        }
-    }
-
-    publications {
-        register('maven', MavenPublication) {
-            from components.cmake
         }
     }
 }
