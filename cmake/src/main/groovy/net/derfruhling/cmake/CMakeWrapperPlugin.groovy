@@ -132,7 +132,8 @@ class CMakeWrapperPlugin implements Plugin<Project> {
 
                             it.commandLine 'cmake',
                                     '-S', config.sourceDirectory.get().asFile.absolutePath,
-                                    '-B', outputDir.asFile.absolutePath
+                                    '-B', outputDir.asFile.absolutePath,
+                                    '-G', config.generator.get()
 
                             if (project.gradle.startParameter.getConsoleOutput() != ConsoleOutput.Plain) {
                                 it.environment 'CLICOLOR_FORCE', '1'

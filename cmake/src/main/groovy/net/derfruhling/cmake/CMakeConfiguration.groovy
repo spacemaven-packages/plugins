@@ -23,6 +23,7 @@ abstract class CMakeConfiguration implements Named {
     final ListProperty<String> dependencies, configureArgs, buildArgs
     final Property<Action<Exec>> configureTaskCreated, buildTaskCreated
     final NamedDomainObjectContainer<CMakeConfigurationTarget> targets
+    final Property<String> generator
 
     @Inject
     CMakeConfiguration(String name, ObjectFactory objects, Project project) {
@@ -43,6 +44,9 @@ abstract class CMakeConfiguration implements Named {
             value.outputKind.convention(this.outputKind)
             return value
         })
+
+        this.generator = objects.property(String)
+        this.generator.convention("Ninja")
 
         this.sourceDirectory.set(project.projectDir)
 
