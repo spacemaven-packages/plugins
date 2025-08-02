@@ -50,9 +50,7 @@ abstract class CMakeConfiguration implements Named {
 
         this.sourceDirectory.set(project.projectDir)
 
-        if(CMakeTarget.current.platform != 'windows') {
-            buildArgs.addAll("--", "-j${Runtime.getRuntime().availableProcessors()}")
-        }
+        buildArgs.addAll("--", "-j${Runtime.getRuntime().availableProcessors()}")
 
         define CMAKE_COLOR_DIAGNOSTICS: true,
                CMAKE_COLOR_MAKEFILE: true
