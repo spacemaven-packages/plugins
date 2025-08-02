@@ -1,4 +1,4 @@
-import net.derfruhling.cmake.OutputKind
+import net.derfruhling.gradle.NativeArtifactOutputKind
 
 plugins {
     id 'net.derfruhling.cmake-wrapper'
@@ -37,7 +37,7 @@ cmake {
 
     configurations {
         staticLibrary {
-            outputKind OutputKind.STATIC_LIBRARY
+            outputKind NativeArtifactOutputKind.STATIC_LIBRARY
             define LIBRARY_KIND: 'STATIC'
 
             targets {
@@ -48,7 +48,7 @@ cmake {
         }
 
         sharedLibrary {
-            outputKind OutputKind.SHARED_LIBRARY
+            outputKind NativeArtifactOutputKind.SHARED_LIBRARY
             define LIBRARY_KIND: 'SHARED'
 
             targets {

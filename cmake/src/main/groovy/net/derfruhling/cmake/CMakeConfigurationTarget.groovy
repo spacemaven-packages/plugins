@@ -1,9 +1,8 @@
 package net.derfruhling.cmake
 
+import net.derfruhling.gradle.NativeArtifactOutputKind
 import org.gradle.api.Action
 import org.gradle.api.Named
-import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -13,7 +12,7 @@ import javax.inject.Inject
 
 abstract class CMakeConfigurationTarget implements Named {
     final String name
-    final Property<OutputKind> outputKind
+    final Property<NativeArtifactOutputKind> outputKind
     final ListProperty<String> dependencies
     final ListProperty<String> buildArgs
     final Property<String> target
@@ -28,7 +27,7 @@ abstract class CMakeConfigurationTarget implements Named {
         this.name = name
         this.parent = parent
 
-        this.outputKind = objects.property(OutputKind)
+        this.outputKind = objects.property(NativeArtifactOutputKind)
         this.dependencies = objects.listProperty(String)
         this.buildArgs = objects.listProperty(String)
         this.target = objects.property(String)
@@ -37,17 +36,17 @@ abstract class CMakeConfigurationTarget implements Named {
         this.artifactSubDir = objects.property(String)
     }
 
-    void outputKind(OutputKind value) {
+    void outputKind(NativeArtifactOutputKind value) {
         outputKind.set(value)
     }
 
     void outputKind(String value) {
         switch (value) {
             case 'static':
-                outputKind OutputKind.STATIC_LIBRARY
+                outputKind NativeArtifactOutputKind.STATIC_LIBRARY
                 break
             case 'shared':
-                outputKind OutputKind.SHARED_LIBRARY
+                outputKind NativeArtifactOutputKind.SHARED_LIBRARY
                 break
             default:
                 throw new IllegalArgumentException("Bad output kind: $value")

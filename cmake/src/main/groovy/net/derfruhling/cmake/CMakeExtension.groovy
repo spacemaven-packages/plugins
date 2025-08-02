@@ -1,5 +1,6 @@
 package net.derfruhling.cmake
 
+import net.derfruhling.gradle.NativeArtifactOutputKind
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Task
@@ -44,30 +45,30 @@ abstract class CMakeExtension {
         c.execute(configurations)
     }
 
-    static Map<String, String> getArtifactName(String name, OutputKind kind, CMakeTarget target = CMakeTarget.getCurrent()) {
+    static Map<String, String> getArtifactName(String name, NativeArtifactOutputKind kind, CMakeTarget target = CMakeTarget.getCurrent()) {
         switch(target) {
             case CMakeTarget.LINUX_X64:
                 switch(kind) {
-                    case OutputKind.STATIC_LIBRARY:
+                    case NativeArtifactOutputKind.STATIC_LIBRARY:
                         return [link: "lib${name}.a"]
-                    case OutputKind.SHARED_LIBRARY:
+                    case NativeArtifactOutputKind.SHARED_LIBRARY:
                         return [link: "lib${name}.so", runtime: "lib${name}.so"]
                 }
                 break
             case CMakeTarget.MACOS_X64:
             case CMakeTarget.MACOS_AARCH64:
                 switch(kind) {
-                    case OutputKind.STATIC_LIBRARY:
+                    case NativeArtifactOutputKind.STATIC_LIBRARY:
                         return [link: "lib${name}.a"]
-                    case OutputKind.SHARED_LIBRARY:
+                    case NativeArtifactOutputKind.SHARED_LIBRARY:
                         return [link: "lib${name}.dylib", runtime: "lib${name}.dylib"]
                 }
                 break
             case CMakeTarget.WINDOWS_X64:
                 switch(kind) {
-                    case OutputKind.STATIC_LIBRARY:
+                    case NativeArtifactOutputKind.STATIC_LIBRARY:
                         return [link: "${name}.lib"]
-                    case OutputKind.SHARED_LIBRARY:
+                    case NativeArtifactOutputKind.SHARED_LIBRARY:
                         return [link: "${name}.lib", runtime: "${name}.dll"]
                 }
                 break

@@ -1,12 +1,11 @@
 package net.derfruhling.cmake
 
+import net.derfruhling.gradle.NativeArtifactOutputKind
 import org.gradle.api.Action
 import org.gradle.api.Named
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
@@ -19,7 +18,7 @@ import javax.inject.Inject
 abstract class CMakeConfiguration implements Named {
     final String name
     final DirectoryProperty sourceDirectory
-    final Property<OutputKind> outputKind
+    final Property<NativeArtifactOutputKind> outputKind
     final MapProperty<String, String> definitions
     final ListProperty<String> dependencies, configureArgs, buildArgs
     final Property<Action<Exec>> configureTaskCreated, buildTaskCreated
@@ -28,7 +27,7 @@ abstract class CMakeConfiguration implements Named {
     @Inject
     CMakeConfiguration(String name, ObjectFactory objects, Project project) {
         this.name = name
-        this.outputKind = objects.property(OutputKind)
+        this.outputKind = objects.property(NativeArtifactOutputKind)
         this.definitions = objects.mapProperty(String, String)
         this.sourceDirectory = objects.directoryProperty()
         this.dependencies = objects.listProperty(String)
@@ -62,17 +61,17 @@ abstract class CMakeConfiguration implements Named {
         action.run()
     }
 
-    void outputKind(OutputKind value) {
+    void outputKind(NativeArtifactOutputKind value) {
         outputKind.set(value)
     }
 
     void outputKind(String value) {
         switch (value) {
             case 'static':
-                outputKind OutputKind.STATIC_LIBRARY
+                outputKind NativeArtifactOutputKind.STATIC_LIBRARY
                 break
             case 'shared':
-                outputKind OutputKind.SHARED_LIBRARY
+                outputKind NativeArtifactOutputKind.SHARED_LIBRARY
                 break
             default:
                 throw new IllegalArgumentException("Bad output kind: $value")

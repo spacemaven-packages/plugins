@@ -6,16 +6,15 @@ version = '0.1.0-SNAPSHOT'
 
 gradlePlugin {
     plugins {
-        create("cmakeWrapper") {
-            id = 'net.derfruhling.cmake-wrapper'
-            implementationClass = 'net.derfruhling.cmake.CMakeWrapperPlugin'
+        create("common") {
+            id = 'net.derfruhling.common-native'
+            implementationClass = 'net.derfruhling.gradle.CommonNativePlugin'
         }
     }
 }
 
 dependencies {
     implementation gradleApi()
-    api project(":common")
 //    implementation 'com.google.guava:guava:33.4.8-jre'
 }
 
