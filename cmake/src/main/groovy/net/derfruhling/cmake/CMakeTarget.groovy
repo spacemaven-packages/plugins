@@ -47,7 +47,7 @@ enum CMakeTarget implements Serializable {
 
         if(osName.contains('windows')) {
             return WINDOWS_X64
-        } else if(osName.contains('macos')) {
+        } else if(osName.contains('mac')) {
             if(System.getProperty('os.arch').toLowerCase().contains('aarch64')) {
                 return MACOS_AARCH64
             } else {
