@@ -75,6 +75,18 @@ class CMakeWrapperPlugin implements Plugin<Project> {
         }
 
         project.afterEvaluate {
+            project.pluginManager.withPlugin('maven-publish') {
+                def publishExt = project.extensions.findByType(PublishingExtension)
+                publishExt.repositories.forEach { repository ->
+                    def task = project.tasks.named("publishCmakePublicationTo${repository.name.capitalize()}Repository")
+
+                    def publishTarget = project.tasks.maybeCreate("publishCommonArtifactsTo${repository.name.capitalize()}Repository")
+                    publishTarget.dependsOn(task)
+                    publishTarget.group = 'publishing'
+                    publishTarget.description = "Publish all stub & API artifacts to repository `${repository.name.capitalize()}`"
+                }
+            }
+
             rootComponent.publishCoordinates.set(DefaultModuleVersionIdentifier.newId(
                     project.group as String,
                     project.name,
@@ -115,6 +127,15 @@ class CMakeWrapperPlugin implements Plugin<Project> {
                             it.from component
                             it.artifactId = project.name + "_api"
                         }
+                    }
+
+                    publishExt.repositories.forEach { repository ->
+                        def task = project.tasks.named("publish${component.name.capitalize()}PublicationTo${repository.name.capitalize()}Repository")
+
+                        def publishTarget = project.tasks.maybeCreate("publishCommonArtifactsTo${repository.name.capitalize()}Repository")
+                        publishTarget.dependsOn(task)
+                        publishTarget.group = 'publishing'
+                        publishTarget.description = "Publish all stub & API artifacts to repository `${repository.name.capitalize()}`"
                     }
                 }
             }
