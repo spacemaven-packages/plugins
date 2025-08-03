@@ -213,9 +213,21 @@ class CMakeWrapperPlugin implements Plugin<Project> {
                                 }
 
                                 publishExt.repositories.forEach { repository ->
-                                    project.tasks.named("publish${theName.capitalize()}PublicationTo${repository.name.capitalize()}Repository") {
+                                    def task = project.tasks.named("publish${theName.capitalize()}PublicationTo${repository.name.capitalize()}Repository") {
                                         it.onlyIf { cmakeTarget.isCompatible() }
                                     }
+
+                                    def publishTarget = project.tasks.maybeCreate("publish${cmakeTarget.platform.capitalize()}TargetsTo${repository.name.capitalize()}Repository")
+                                    publishTarget.dependsOn(task)
+
+                                    publishTarget.doFirst {
+                                        if(!cmakeTarget.isCompatible()) {
+                                            throw new IllegalStateException("This platform doesn't support publishing these `${cmakeTarget.platform}` artifacts. Did you mean to add this task to a different CI job?")
+                                        }
+                                    }
+
+                                    publishTarget.group = 'publishing'
+                                    publishTarget.description = "Publish all artifacts compatible with the `${cmakeTarget.platform}` platform to repository `${repository.name.capitalize()}`"
                                 }
                             }
                         }
