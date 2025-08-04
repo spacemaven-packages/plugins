@@ -35,7 +35,7 @@ class InfoConsumerPlugin implements Plugin<Project> {
             })
         })
 
-        target.tasks.register("spmInfo") {
+        target.tasks.register("printSpmInfo") {
             it.doFirst {
                 performConfiguration(target)
 
