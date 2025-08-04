@@ -68,6 +68,14 @@ cmake {
                 }
             }
         }
+
+        configureEach {
+            platforms {
+                linuxX64.define PLATFORM: 'linux'
+                macosAll.define PLATFORM: 'macos'
+                windowsX64.define PLATFORM: 'windows'
+            }
+        }
     }
 }
 

@@ -15,15 +15,20 @@ import org.jetbrains.annotations.Nullable
 
 import javax.inject.Inject
 
-abstract class CMakeConfiguration implements Named {
+abstract class CMakeConfiguration extends CMakeCommonConfiguration implements Named {
     final String name
     final DirectoryProperty sourceDirectory
     final Property<NativeArtifactOutputKind> outputKind
     final MapProperty<String, String> definitions
-    final ListProperty<String> dependencies, configureArgs, buildArgs
+    final ListProperty<String> dependencies
+    final ListProperty<String> configureArgs
+    final ListProperty<String> buildArgs
     final Property<Action<Exec>> configureTaskCreated, buildTaskCreated
     final NamedDomainObjectContainer<CMakeConfigurationTarget> targets
+    final ListProperty<CMakePlatformDefinition> platforms
     final Property<String> generator
+
+    private final ObjectFactory objects
 
     @Inject
     CMakeConfiguration(String name, ObjectFactory objects, Project project) {
@@ -44,6 +49,8 @@ abstract class CMakeConfiguration implements Named {
             value.outputKind.convention(this.outputKind)
             return value
         })
+        this.platforms = objects.listProperty(CMakePlatformDefinition)
+        this.objects = objects
 
         this.generator = objects.property(String)
         this.generator.convention("Ninja")
@@ -82,35 +89,16 @@ abstract class CMakeConfiguration implements Named {
         }
     }
 
-    void configureArgs(String... args) {
-        configureArgs.addAll(args)
-    }
-
-    void buildArgs(String... args) {
-        buildArgs.addAll(args)
-    }
-
-    void define(Map<String, @Nullable Object> map) {
-        map.forEach { key, value ->
-            switch (value) {
-                case null:
-                    value = ""
-                    break
-                case true:
-                    value = "ON"
-                    break
-                case false:
-                    value = "OFF"
-                    break
-                default:
-                    value = value.toString()
-            }
-
-            definitions.put(key, value)
-        }
-    }
-
     void after(String name) {
         dependencies.add(name)
+    }
+
+    void platforms(@DelegatesTo(CMakeConfigurationPlatformDsl) Closure action) {
+        action.setDelegate(new CMakeConfigurationPlatformDsl(platforms, objects))
+        action.run()
+    }
+
+    void platforms(Action<CMakeConfigurationPlatformDsl> action) {
+        action.execute(new CMakeConfigurationPlatformDsl(platforms, objects))
     }
 }

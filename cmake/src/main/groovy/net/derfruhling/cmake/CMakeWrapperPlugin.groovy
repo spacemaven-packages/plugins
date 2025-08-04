@@ -148,6 +148,7 @@ class CMakeWrapperPlugin implements Plugin<Project> {
 
                 ext.targets.targets.get().forEach { cmakeTarget ->
                     ext.configurations.forEach { config ->
+                        def definition = config.platforms.get().find { it.target == cmakeTarget }
                         final def capName = config.name.capitalize() + variant.capitalize()
 
                         final def outputDir = project.layout.buildDirectory.get().dir('cmake').dir(config.name).dir(variant).dir(cmakeTarget.platform).dir(cmakeTarget.architecture)
@@ -176,7 +177,9 @@ class CMakeWrapperPlugin implements Plugin<Project> {
 
                             it.args config.definitions.get().entrySet().collect { "-D${it.key}=${it.value}" }
                             it.args cmakeTarget.extraCMakeArgs.entrySet().collect { "-D${it.key}=${it.value}" }
+                            if(definition != null) it.args definition.platformConfig.definitions.get().entrySet().collect { "-D${it.key}=${it.value}" }
                             it.args config.configureArgs.get().toArray()
+                            if(definition != null) it.args definition.platformConfig.configureArgs.get().toArray()
                         }
 
                         final def configureTaskConfigurer = config.configureTaskCreated.getOrElse(null)
@@ -274,6 +277,7 @@ class CMakeWrapperPlugin implements Plugin<Project> {
         def artifacts = CMakeExtension.getArtifactName(target.artifactBaseName.get(), target.outputKind.get())
         def linkArtifactFile = outputDir.dir(target.artifactSubDir).map { it.file(artifacts.link) }
         def runtimeArtifactFile = artifacts.containsKey('runtime') ? outputDir.dir(target.artifactSubDir).map { it.file(artifacts.runtime) } : null
+        def definition = config.platforms.get().find { it.target == cmakeTarget }
 
         final def buildTask = project.tasks.register("cmake${capName}Build${target.name.capitalize()}${cmakeTarget.variantName.capitalize()}", Exec) {
             it.dependsOn(configureTask)
@@ -302,6 +306,7 @@ class CMakeWrapperPlugin implements Plugin<Project> {
 
             it.environment 'CLICOLOR_FORCE', '1'
 
+            if(definition != null) it.args(definition.platformConfig.buildArgs.get().toArray())
             it.args(config.buildArgs.get().toArray())
         }
 
