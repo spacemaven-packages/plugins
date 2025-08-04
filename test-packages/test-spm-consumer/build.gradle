@@ -1,0 +1,20 @@
+plugins {
+    id 'net.derfruhling.common-native'
+    id 'net.derfruhling.spm'
+    id 'cpp-application'
+    id 'maven-publish'
+}
+
+group = 'net.derfruhling.spacemaven.test'
+version = '0.1.0'
+
+repositories {
+    maven {
+        name 'spacemavenNative'
+        url 'https://spacemaven.derfruhling.net/native/'
+    }
+}
+
+dependencies {
+    implementation project(":test-cmake")
+}

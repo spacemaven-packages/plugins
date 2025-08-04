@@ -1,11 +1,13 @@
 package net.derfruhling.cmake
 
+import net.derfruhling.gradle.NativeTarget
+
 class CMakePlatformDefinition {
-    final CMakeTarget target
+    final NativeTarget target
     final boolean aggregate
     final CMakeConfigurationPlatform platformConfig
 
-    CMakePlatformDefinition(CMakeTarget target, boolean aggregate, CMakeConfigurationPlatform platformConfig) {
+    CMakePlatformDefinition(NativeTarget target, boolean aggregate, CMakeConfigurationPlatform platformConfig) {
         this.target = target
         this.aggregate = aggregate
         this.platformConfig = platformConfig

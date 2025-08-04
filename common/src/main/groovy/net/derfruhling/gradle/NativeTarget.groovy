@@ -1,11 +1,12 @@
-package net.derfruhling.cmake
+package net.derfruhling.gradle
 
 import org.gradle.nativeplatform.TargetMachine
 import org.gradle.nativeplatform.TargetMachineFactory
+import org.gradle.nativeplatform.platform.NativePlatform
 
 import java.util.function.Function
 
-enum CMakeTarget implements Serializable {
+enum NativeTarget implements Serializable {
     LINUX_X64("linux", "x86-64", { it.linux.x86_64 }),
     MACOS_X64("macos", "x86-64", { it.macOS.x86_64 }) {
         @Override
@@ -25,7 +26,7 @@ enum CMakeTarget implements Serializable {
     private final Function<TargetMachineFactory, TargetMachine> build
     private TargetMachine machine = null
 
-    private CMakeTarget(String platform, String architecture, Function<TargetMachineFactory, TargetMachine> build) {
+    private NativeTarget(String platform, String architecture, Function<TargetMachineFactory, TargetMachine> build) {
         this.platform = platform
         this.architecture = architecture
         this.build = build
@@ -42,7 +43,7 @@ enum CMakeTarget implements Serializable {
         if(machine == null) machine = build.apply(factory)
     }
 
-    static CMakeTarget getCurrent() {
+    static NativeTarget getCurrent() {
         def osName = System.getProperty('os.name').toLowerCase()
 
         if(osName.contains('windows')) {
@@ -58,6 +59,10 @@ enum CMakeTarget implements Serializable {
         } else {
             throw new IllegalStateException("Unsupported platform: $osName")
         }
+    }
+
+    static NativeTarget forNativePlatform(NativePlatform platform) {
+        return values().find { it.platform == platform.operatingSystem.name && it.architecture == platform.architecture.name }
     }
 
     boolean isCurrent() {

@@ -6,20 +6,21 @@ version = '0.1.0-SNAPSHOT'
 
 gradlePlugin {
     plugins {
-        create("common") {
-            id = 'net.derfruhling.common-native'
-            implementationClass = 'net.derfruhling.gradle.CommonNativePlugin'
+        create("spmInfoPublisher") {
+            id = 'net.derfruhling.spm.publisher'
+            implementationClass = 'net.derfruhling.spm.publisher.InfoPublisherPlugin'
+        }
+
+        create("spmInfoConsumer") {
+            id = 'net.derfruhling.spm'
+            implementationClass = 'net.derfruhling.spm.consumer.InfoConsumerPlugin'
         }
     }
 }
 
 dependencies {
     implementation gradleApi()
-    compileOnly project(':spm-info')
 //    implementation 'com.google.guava:guava:33.4.8-jre'
-
-    testImplementation platform("org.spockframework:spock-bom:2.3-groovy-3.0")
-    testImplementation "org.spockframework:spock-core"
 }
 
 publishing {
@@ -33,12 +34,5 @@ publishing {
                 password project.property('spacemaven.key') as String ?: 'anonymous'
             }
         }
-    }
-}
-
-test {
-    useJUnitPlatform()
-    testLogging {
-        events "passed", "skipped", "failed"
     }
 }

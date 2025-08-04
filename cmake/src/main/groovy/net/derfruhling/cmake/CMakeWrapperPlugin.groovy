@@ -1,6 +1,7 @@
 package net.derfruhling.cmake
 
-import net.derfruhling.gradle.AggregateSoftwareComponent
+
+import net.derfruhling.gradle.NativeTarget
 import net.derfruhling.gradle.CommonNativePlugin
 import net.derfruhling.gradle.NativeArtifact
 import org.gradle.api.Plugin
@@ -45,7 +46,11 @@ class CMakeWrapperPlugin implements Plugin<Project> {
         project.apply plugin: 'base'
         project.apply plugin: CommonNativePlugin
 
-        for (final def value in CMakeTarget.values()) {
+        project.dependencies.attributesSchema {
+            it.attribute(CMake.CMAKE_TARGET_ATTRIBUTE)
+        }
+
+        for (final def value in NativeTarget.values()) {
             value.build(targetMachineFactory)
         }
 
@@ -262,7 +267,7 @@ class CMakeWrapperPlugin implements Plugin<Project> {
     }
 
     private void setupBuildTarget(
-            CMakeTarget cmakeTarget,
+            NativeTarget cmakeTarget,
             CMakeConfigurationTarget target,
             Directory outputDir,
             Project project,
@@ -347,10 +352,20 @@ class CMakeWrapperPlugin implements Plugin<Project> {
         }
         */
 
-        outConfig.outgoing {
-            def theVariant = it.variants.maybeCreate("${project.name}_${variant}_${cmakeTarget.platform}_${cmakeTarget.architecture.replace('-', '_')}_${target.outputKind.get().name().toLowerCase().takeBefore("_")}")
+        outConfig.attributes {
+            it.attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling, Bundling.EXTERNAL))
+            it.attributeProvider(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, target.outputKind.map { objects.named(LibraryElements, it.libraryElementAttribute) })
+            it.attribute(OperatingSystemFamily.OPERATING_SYSTEM_ATTRIBUTE, cmakeTarget.machine.operatingSystemFamily)
+            it.attribute(MachineArchitecture.ARCHITECTURE_ATTRIBUTE, cmakeTarget.machine.architecture)
+            it.attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category, Category.LIBRARY))
+            it.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.NATIVE_LINK))
+            it.attribute(CppBinary.DEBUGGABLE_ATTRIBUTE, isDebuggable)
+            it.attribute(CppBinary.OPTIMIZED_ATTRIBUTE, isOptimized)
+            it.attributeProvider(CppBinary.LINKAGE_ATTRIBUTE, target.outputKind.map { it.linkage })
+        }
 
-            theVariant.artifact(new FileSystemPublishArtifact(linkArtifactFile.get(), project.version as String) {
+        outConfig.outgoing {
+            it.artifact(new FileSystemPublishArtifact(linkArtifactFile.get(), project.version as String) {
                 @Override
                 boolean shouldBePublished() {
                     return cmakeTarget.isCompatible()
@@ -360,19 +375,8 @@ class CMakeWrapperPlugin implements Plugin<Project> {
                 it.setClassifier(target.name + '-link-' + variant + cmakeTarget.variantName.capitalize())
             }
 
-            theVariant.attributes {
-                it.attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling, Bundling.EXTERNAL))
-                it.attributeProvider(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, target.outputKind.map { objects.named(LibraryElements, it.libraryElementAttribute) })
-                it.attribute(OperatingSystemFamily.OPERATING_SYSTEM_ATTRIBUTE, cmakeTarget.machine.operatingSystemFamily)
-                it.attribute(MachineArchitecture.ARCHITECTURE_ATTRIBUTE, cmakeTarget.machine.architecture)
-                it.attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category, Category.LIBRARY))
-                it.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.NATIVE_LINK))
-                it.attribute(CppBinary.DEBUGGABLE_ATTRIBUTE, isDebuggable)
-                it.attribute(CppBinary.OPTIMIZED_ATTRIBUTE, isOptimized)
-                it.attributeProvider(CppBinary.LINKAGE_ATTRIBUTE, target.outputKind.map { it.linkage })
-            }
-
             if (runtimeArtifactFile != null) {
+                def theVariant = it.variants.maybeCreate("runtime")
                 theVariant.artifact(runtimeArtifactFile.get()) {
                     it.builtBy(buildTask)
                     it.setClassifier(target.name + '-runtime-' + variant + cmakeTarget.variantName.capitalize())

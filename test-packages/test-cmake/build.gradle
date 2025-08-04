@@ -1,7 +1,11 @@
 import net.derfruhling.gradle.NativeArtifactOutputKind
+import net.derfruhling.gradle.ArtifactUsageInformation
+
+import static net.derfruhling.gradle.NativeTarget.*
 
 plugins {
     id 'net.derfruhling.cmake-wrapper'
+    id 'net.derfruhling.spm.publisher'
     id 'maven-publish'
 }
 
@@ -17,6 +21,32 @@ repositories {
 
 dependencies {
     implementation 'net.derfruhling.spaceport:gtest:1.17.0'
+}
+
+spmInfo {
+    register(ArtifactUsageInformation) {
+        forAll {
+            requireCompileDefinition MIAW: true
+        }
+
+        platform(MACOS_AARCH64, MACOS_X64) {
+            requireCompileDefinition PLATFORM: 'macos'
+
+            expectFramework 'Cocoa', 'OpenGL'
+        }
+
+        platform(LINUX_X64) {
+            requireCompileDefinition PLATFORM: 'linux'
+
+            expectLibrary 'X11', 'GL'
+        }
+
+        platform(WINDOWS_X64) {
+            requireCompileDefinition PLATFORM: 'windows'
+
+            expectLibrary 'windows', 'opengl'
+        }
+    }
 }
 
 cmake {

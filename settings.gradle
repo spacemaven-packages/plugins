@@ -16,3 +16,4 @@ include 'build-cache'
 
 include 'common'
 include 'cmake'
+include 'spm-info'

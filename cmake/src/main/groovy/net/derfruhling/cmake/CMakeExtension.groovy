@@ -1,5 +1,6 @@
 package net.derfruhling.cmake
 
+import net.derfruhling.gradle.NativeTarget
 import net.derfruhling.gradle.NativeArtifactOutputKind
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
@@ -45,9 +46,9 @@ abstract class CMakeExtension {
         c.execute(configurations)
     }
 
-    static Map<String, String> getArtifactName(String name, NativeArtifactOutputKind kind, CMakeTarget target = CMakeTarget.getCurrent()) {
+    static Map<String, String> getArtifactName(String name, NativeArtifactOutputKind kind, NativeTarget target = NativeTarget.getCurrent()) {
         switch(target) {
-            case CMakeTarget.LINUX_X64:
+            case NativeTarget.LINUX_X64:
                 switch(kind) {
                     case NativeArtifactOutputKind.STATIC_LIBRARY:
                         return [link: "lib${name}.a"]
@@ -55,8 +56,8 @@ abstract class CMakeExtension {
                         return [link: "lib${name}.so", runtime: "lib${name}.so"]
                 }
                 break
-            case CMakeTarget.MACOS_X64:
-            case CMakeTarget.MACOS_AARCH64:
+            case NativeTarget.MACOS_X64:
+            case NativeTarget.MACOS_AARCH64:
                 switch(kind) {
                     case NativeArtifactOutputKind.STATIC_LIBRARY:
                         return [link: "lib${name}.a"]
@@ -64,7 +65,7 @@ abstract class CMakeExtension {
                         return [link: "lib${name}.dylib", runtime: "lib${name}.dylib"]
                 }
                 break
-            case CMakeTarget.WINDOWS_X64:
+            case NativeTarget.WINDOWS_X64:
                 switch(kind) {
                     case NativeArtifactOutputKind.STATIC_LIBRARY:
                         return [link: "${name}.lib"]
@@ -77,7 +78,7 @@ abstract class CMakeExtension {
 
     @FunctionalInterface
     interface VariantAcceptor {
-        void execute(String name, boolean isDebuggable, boolean isOptimized, CMakeTarget target)
+        void execute(String name, boolean isDebuggable, boolean isOptimized, NativeTarget target)
     }
 
     void allVariants(Action<String> action) {

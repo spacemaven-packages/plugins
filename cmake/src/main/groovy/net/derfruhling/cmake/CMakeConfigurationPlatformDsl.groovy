@@ -1,10 +1,8 @@
 package net.derfruhling.cmake
 
-import org.gradle.api.Action
+import net.derfruhling.gradle.NativeTarget
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
-
-import java.util.function.Supplier
 
 final class CMakeConfigurationPlatformDsl {
     final ListProperty<CMakePlatformDefinition> platforms
@@ -16,7 +14,7 @@ final class CMakeConfigurationPlatformDsl {
         this.objects = objects
     }
 
-    private CMakeConfigurationPlatform getPlatform(CMakeTarget target) {
+    private CMakeConfigurationPlatform getPlatform(NativeTarget target) {
         def value = platforms.get().find { it.target == target && !it.aggregate }
         if(value != null) return value.platformConfig
 
@@ -25,12 +23,12 @@ final class CMakeConfigurationPlatformDsl {
         return value.platformConfig
     }
 
-    CMakeConfigurationPlatform getLinuxX64() { return getPlatform(CMakeTarget.LINUX_X64) }
-    CMakeConfigurationPlatform getMacosX64() { return getPlatform(CMakeTarget.MACOS_X64) }
-    CMakeConfigurationPlatform getMacosArm64() { return getPlatform(CMakeTarget.MACOS_AARCH64) }
-    CMakeConfigurationPlatform getWindowsX64() { return getPlatform(CMakeTarget.WINDOWS_X64) }
+    CMakeConfigurationPlatform getLinuxX64() { return getPlatform(NativeTarget.LINUX_X64) }
+    CMakeConfigurationPlatform getMacosX64() { return getPlatform(NativeTarget.MACOS_X64) }
+    CMakeConfigurationPlatform getMacosArm64() { return getPlatform(NativeTarget.MACOS_AARCH64) }
+    CMakeConfigurationPlatform getWindowsX64() { return getPlatform(NativeTarget.WINDOWS_X64) }
 
-    private CMakeConfigurationPlatform defineAggregatePlatform(CMakeTarget... targets) {
+    private CMakeConfigurationPlatform defineAggregatePlatform(NativeTarget... targets) {
         assert targets.length > 0
         CMakePlatformDefinition value = null
 
@@ -52,6 +50,6 @@ final class CMakeConfigurationPlatformDsl {
     }
 
     CMakeConfigurationPlatform getMacosAll() {
-        return defineAggregatePlatform(CMakeTarget.MACOS_AARCH64, CMakeTarget.MACOS_X64)
+        return defineAggregatePlatform(NativeTarget.MACOS_AARCH64, NativeTarget.MACOS_X64)
     }
 }
