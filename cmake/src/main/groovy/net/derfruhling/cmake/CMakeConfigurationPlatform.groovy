@@ -12,14 +12,17 @@ abstract class CMakeConfigurationPlatform extends CMakeCommonConfiguration {
     final MapProperty<String, String> definitions
     final ListProperty<String> configureArgs
     final ListProperty<String> buildArgs
-    final Property<String> outputFileName, extension
+    final MapProperty<String, String> outputFileNames
 
     @Inject
     CMakeConfigurationPlatform(ObjectFactory objects) {
         definitions = objects.mapProperty(String, String)
         configureArgs = objects.listProperty(String)
         buildArgs = objects.listProperty(String)
-        outputFileName = objects.property(String)
-        extension = objects.property(String)
+        outputFileNames = objects.mapProperty(String, String)
+    }
+
+    void outputFile(Map<String, String> map) {
+        outputFileNames.putAll(map)
     }
 }

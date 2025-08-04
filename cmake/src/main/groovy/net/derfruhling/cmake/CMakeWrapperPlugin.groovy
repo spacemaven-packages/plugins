@@ -280,9 +280,10 @@ class CMakeWrapperPlugin implements Plugin<Project> {
             boolean isOptimized
     ) {
         def artifacts = CMakeExtension.getArtifactName(target.artifactBaseName.get(), target.outputKind.get())
+        def definition = config.platforms.get().find { it.target == cmakeTarget }
+        artifacts.putAll(definition.platformConfig.outputFileNames.get())
         def linkArtifactFile = outputDir.dir(target.artifactSubDir).map { it.file(artifacts.link) }
         def runtimeArtifactFile = artifacts.containsKey('runtime') ? outputDir.dir(target.artifactSubDir).map { it.file(artifacts.runtime) } : null
-        def definition = config.platforms.get().find { it.target == cmakeTarget }
 
         final def buildTask = project.tasks.register("cmake${capName}Build${target.name.capitalize()}${cmakeTarget.variantName.capitalize()}", Exec) {
             it.dependsOn(configureTask)
