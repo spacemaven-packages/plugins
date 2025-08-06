@@ -1,0 +1,19 @@
+plugins {
+    id 'net.derfruhling.magic.gtest'
+    id 'cpp-unit-test'
+    id 'maven-publish'
+}
+
+group = 'net.derfruhling.spacemaven.test'
+version = '0.1.0'
+
+repositories {
+    maven {
+        name 'spacemavenNative'
+        url 'https://spacemaven.derfruhling.net/native/'
+    }
+}
+
+dependencies {
+    testImplementation 'net.derfruhling.spaceport:gtest:1.17.0'
+}

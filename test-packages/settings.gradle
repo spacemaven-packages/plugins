@@ -9,3 +9,4 @@ plugins {
 include 'test-tool'
 include 'test-cmake'
 include 'test-spm-consumer'
+include 'test-gtest'
