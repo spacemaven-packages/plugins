@@ -3,9 +3,10 @@ package net.derfruhling.gradle;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.language.cpp.tasks.CppCompile;
-import org.gradle.language.nativeplatform.tasks.AbstractNativeCompileTask;
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.stream.Stream;
 
 public class CompileCommandsPlugin implements Plugin<Project> {
     @Override
@@ -15,6 +16,8 @@ public class CompileCommandsPlugin implements Plugin<Project> {
                 task.getSources().set(relevantCompileTask.getSource());
                 task.getCompileArgs().addAll(relevantCompileTask.getCompilerArgs());
                 task.getCompileArgs().addAll(relevantCompileTask.getMacros().entrySet().stream().map(e -> "-D" + e.getKey() + "=" + e.getValue()).toList());
+                task.getCompileArgs().addAll(relevantCompileTask.getIncludes().getElements().map(s -> s.stream().map(l -> "-I" + l.getAsFile().getAbsolutePath()).toList()));
+                task.getCompileArgs().addAll(relevantCompileTask.getSystemIncludes().getElements().map(s -> s.stream().flatMap(l -> Stream.of("-isystem", l.getAsFile().getAbsolutePath())).toList()));
                 var os = relevantCompileTask.getTargetPlatform().getOrElse(DefaultNativePlatform.host()).getOperatingSystem();
 
                 if(os.isWindows()) {
