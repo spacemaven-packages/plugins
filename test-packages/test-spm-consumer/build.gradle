@@ -1,6 +1,7 @@
 plugins {
     id 'net.derfruhling.common-native'
     id 'net.derfruhling.spm'
+    id 'net.derfruhling.compile-commands'
     id 'cpp-application'
     id 'maven-publish'
 }

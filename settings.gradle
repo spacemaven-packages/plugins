@@ -13,6 +13,7 @@ dependencyResolutionManagement {
 
 include 'tools'
 include 'build-cache'
+include 'compile-commands'
 
 include 'common'
 include 'cmake'

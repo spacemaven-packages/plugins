@@ -1,0 +1,34 @@
+/*plugins {
+    id 'groovy'
+}*/
+// TODO groovy-ize this
+
+version = '0.1.0-SNAPSHOT'
+
+gradlePlugin {
+    plugins {
+        create("compileCommands") {
+            id = 'net.derfruhling.compile-commands'
+            implementationClass = 'net.derfruhling.gradle.CompileCommandsPlugin'
+        }
+    }
+}
+
+dependencies {
+    implementation gradleApi()
+    implementation 'com.google.code.gson:gson:2.13.1'
+}
+
+publishing {
+    repositories {
+        maven {
+            name 'spacemavenGradlePlugins'
+            url 'https://spacemaven.derfruhling.net/gradle-plugins/'
+
+            credentials {
+                username project.property('spacemaven.user') as String ?: 'anonymous'
+                password project.property('spacemaven.key') as String ?: 'anonymous'
+            }
+        }
+    }
+}
