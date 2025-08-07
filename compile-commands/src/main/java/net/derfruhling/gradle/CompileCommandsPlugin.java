@@ -13,7 +13,8 @@ public class CompileCommandsPlugin implements Plugin<Project> {
         target.getTasks().withType(CppCompile.class).whenTaskAdded(relevantCompileTask -> {
             target.getTasks().register(relevantCompileTask.getName() + "Commands", CompileCommandsTask.class, task -> {
                 task.getSources().set(relevantCompileTask.getSource());
-                task.getCompileArgs().set(relevantCompileTask.getCompilerArgs());
+                task.getCompileArgs().addAll(relevantCompileTask.getCompilerArgs());
+                task.getCompileArgs().addAll(relevantCompileTask.getMacros().entrySet().stream().map(e -> "-D" + e.getKey() + "=" + e.getValue()).toList());
                 var os = relevantCompileTask.getTargetPlatform().getOrElse(DefaultNativePlatform.host()).getOperatingSystem();
 
                 if(os.isWindows()) {
