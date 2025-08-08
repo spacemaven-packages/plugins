@@ -16,11 +16,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 
 public abstract class CompileCommandsTask extends DefaultTask {
-    public record CompilationDatabaseEntry(
-            String directory,
-            String file,
-            String[] arguments
-    ) {}
 
     @Input
     public abstract Property<String> getRootPath();
