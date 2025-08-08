@@ -3,7 +3,9 @@ package net.derfruhling.gradle;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskProvider;
+import org.gradle.language.cpp.CppLibrary;
 import org.gradle.language.nativeplatform.tasks.AbstractNativeCompileTask;
+import org.gradle.nativeplatform.NativeComponentExtension;
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,6 +29,7 @@ public class CompileCommandsPlugin implements Plugin<Project> {
         subProj.getTasks().withType(AbstractNativeCompileTask.class).whenTaskAdded(relevantCompileTask -> {
             var newTask = subProj.getTasks().register(relevantCompileTask.getName() + "Commands", CompileCommandsTask.class, task -> {
                 task.getSources().set(relevantCompileTask.getSource());
+                task.getObjectDir().set(relevantCompileTask.getObjectFileDir().map(v -> v.getAsFile().getAbsolutePath()));
                 task.getCompileArgs().addAll(relevantCompileTask.getCompilerArgs());
                 task.getCompileArgs().addAll(relevantCompileTask.getMacros().entrySet().stream().map(e -> "-D" + e.getKey() + "=" + e.getValue()).toList());
                 task.getCompileArgs().addAll(relevantCompileTask.getIncludes().getFiles().stream().map(l -> "-I" + l.getAbsolutePath()).toList());
