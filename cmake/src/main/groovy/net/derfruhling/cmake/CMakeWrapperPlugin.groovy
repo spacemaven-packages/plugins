@@ -98,50 +98,50 @@ class CMakeWrapperPlugin implements Plugin<Project> {
                     project.version as String
             ))
 
+            def apiComponent = componentFactory.adhoc('cmakePublicApi')
+            def apiConfig = project.configurations.create('cmakePublicApi')
+            apiConfig.visible = false
+
+            apiConfig.extendsFrom implementationConfiguration.get(), apiConfiguration.get()
+
+            apiConfig.attributes {
+                it.attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling, Bundling.EXTERNAL))
+                it.attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements, LibraryElements.HEADERS_CPLUSPLUS))
+                it.attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category, Category.LIBRARY))
+                it.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.C_PLUS_PLUS_API))
+            }
+
             if(ext.publicHeadersArchive.isPresent()) {
-                def component = componentFactory.adhoc('cmakePublicApi')
-                def apiConfig = project.configurations.create('cmakePublicApi')
-                apiConfig.visible = false
-
-                apiConfig.extendsFrom implementationConfiguration.get(), apiConfiguration.get()
-
-                apiConfig.attributes {
-                    it.attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling, Bundling.EXTERNAL))
-                    it.attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements, LibraryElements.HEADERS_CPLUSPLUS))
-                    it.attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category, Category.LIBRARY))
-                    it.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.C_PLUS_PLUS_API))
-                }
-
                 apiConfig.outgoing {
                     it.artifact(ext.publicHeadersArchive.get().outputs.files.singleFile) {
                         it.builtBy(ext.publicHeadersArchive)
                         it.setClassifier('api')
                     }
                 }
+            }
 
-                component.addVariantsFromConfiguration(apiConfig) {
-                    it.mapToMavenScope("compile")
+            apiComponent.addVariantsFromConfiguration(apiConfig) {
+                it.mapToMavenScope("compile")
+            }
+
+            rootComponent.registerVariant(apiComponent)
+
+            project.pluginManager.withPlugin('maven-publish') {
+                def publishExt = project.extensions.findByType(PublishingExtension)
+                publishExt.publications {
+                    it.create(apiComponent.name, MavenPublication) {
+                        it.from apiComponent
+                        it.artifactId = project.name + "_api"
+                    }
                 }
 
-                rootComponent.registerVariant(component)
+                publishExt.repositories.forEach { repository ->
+                    def task = project.tasks.named("publish${apiComponent.name.capitalize()}PublicationTo${repository.name.capitalize()}Repository")
 
-                project.pluginManager.withPlugin('maven-publish') {
-                    def publishExt = project.extensions.findByType(PublishingExtension)
-                    publishExt.publications {
-                        it.create(component.name, MavenPublication) {
-                            it.from component
-                            it.artifactId = project.name + "_api"
-                        }
-                    }
-
-                    publishExt.repositories.forEach { repository ->
-                        def task = project.tasks.named("publish${component.name.capitalize()}PublicationTo${repository.name.capitalize()}Repository")
-
-                        def publishTarget = project.tasks.maybeCreate("publishCommonArtifactsTo${repository.name.capitalize()}Repository")
-                        publishTarget.dependsOn(task)
-                        publishTarget.group = 'publishing'
-                        publishTarget.description = "Publish all stub & API artifacts to repository `${repository.name.capitalize()}`"
-                    }
+                    def publishTarget = project.tasks.maybeCreate("publishCommonArtifactsTo${repository.name.capitalize()}Repository")
+                    publishTarget.dependsOn(task)
+                    publishTarget.group = 'publishing'
+                    publishTarget.description = "Publish all stub & API artifacts to repository `${repository.name.capitalize()}`"
                 }
             }
 
