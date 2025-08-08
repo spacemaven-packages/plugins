@@ -330,29 +330,6 @@ class CMakeWrapperPlugin implements Plugin<Project> {
 
         project.tasks.assemble.dependsOn(assembleTask)
 
-        def cmakeTargetBaseName = "cmake${config.name.capitalize()}${variant.capitalize()}${target.name.capitalize()}${cmakeTarget.variantName.capitalize()}"
-
-        /* Using maybeCreate here allows the configurations
-           to depend on information defined in the extension
-           while also allowing special cases of very specific
-           output targets requiring special configuration */
-
-        /*
-        // example of what we're trying to support
-        configurations {
-            cmakeVariantTargetPlatformArchitecture // common elements
-            cmakeVariantTargetPlatformArchitectureLink // linking elements
-            cmakeVariantTargetPlatformArchitectureRuntime // runtime elements
-
-            // examples
-            cmakeReleaseGtestWindowsX86_64
-            cmakeReleaseGtestWindowsX86_64Link
-            cmakeReleaseGtestWindowsX86_64Runtime
-
-            // these then should be usable as regular dependency configurations
-        }
-        */
-
         outConfig.attributes {
             it.attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling, Bundling.EXTERNAL))
             it.attributeProvider(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, target.outputKind.map { objects.named(LibraryElements, it.libraryElementAttribute) })
@@ -376,24 +353,25 @@ class CMakeWrapperPlugin implements Plugin<Project> {
                 it.setClassifier(target.name + '-link-' + variant + cmakeTarget.variantName.capitalize())
             }
 
+            def theVariant = it.variants.maybeCreate("runtime")
+
             if (runtimeArtifactFile != null) {
-                def theVariant = it.variants.maybeCreate("runtime")
                 theVariant.artifact(runtimeArtifactFile.get()) {
                     it.builtBy(buildTask)
                     it.setClassifier(target.name + '-runtime-' + variant + cmakeTarget.variantName.capitalize())
                 }
+            }
 
-                theVariant.attributes {
-                    it.attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling, Bundling.EXTERNAL))
-                    it.attributeProvider(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, target.outputKind.map { objects.named(LibraryElements, it.libraryElementAttribute) })
-                    it.attribute(OperatingSystemFamily.OPERATING_SYSTEM_ATTRIBUTE, cmakeTarget.machine.operatingSystemFamily)
-                    it.attribute(MachineArchitecture.ARCHITECTURE_ATTRIBUTE, cmakeTarget.machine.architecture)
-                    it.attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category, Category.LIBRARY))
-                    it.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.NATIVE_RUNTIME))
-                    it.attribute(CppBinary.DEBUGGABLE_ATTRIBUTE, isDebuggable)
-                    it.attribute(CppBinary.OPTIMIZED_ATTRIBUTE, isOptimized)
-                    it.attributeProvider(CppBinary.LINKAGE_ATTRIBUTE, target.outputKind.map { it.linkage })
-                }
+            theVariant.attributes {
+                it.attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling, Bundling.EXTERNAL))
+                it.attributeProvider(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, target.outputKind.map { objects.named(LibraryElements, it.libraryElementAttribute) })
+                it.attribute(OperatingSystemFamily.OPERATING_SYSTEM_ATTRIBUTE, cmakeTarget.machine.operatingSystemFamily)
+                it.attribute(MachineArchitecture.ARCHITECTURE_ATTRIBUTE, cmakeTarget.machine.architecture)
+                it.attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category, Category.LIBRARY))
+                it.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.NATIVE_RUNTIME))
+                it.attribute(CppBinary.DEBUGGABLE_ATTRIBUTE, isDebuggable)
+                it.attribute(CppBinary.OPTIMIZED_ATTRIBUTE, isOptimized)
+                it.attributeProvider(CppBinary.LINKAGE_ATTRIBUTE, target.outputKind.map { it.linkage })
             }
         }
     }
